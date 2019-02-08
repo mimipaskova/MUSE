@@ -1,0 +1,219 @@
+
+2018-01-07
+==========
+(Maria, Preslav)
+
+
+
+!!! BPEmb is a collection of pre-trained subword embeddings in 275 languages, based on Byte-Pair Encoding (BPE) and trained on Wikipedia. Its intended use is as input for neural models in natural language processing.
+
+https://github.com/bheinzerling/bpemb
+
+They have:
+
+	src: EN
+	tgt: ES
+
+	train: https://s3.amazonaws.com/arrival/dictionaries/en-es.0-5000.txt
+	test:  https://s3.amazonaws.com/arrival/dictionaries/en-es.5000-6500.txt
+
+eg:
+	impression impresiÃ³n
+	discover descubrir
+	discover descubra
+	discover descubre
+	discover descubren
+	relocated trasladÃ³
+	relocated trasladado
+
+
+We should have: 
+
+	src: BG
+	tgt: MK
+
+	train: bg-mk.0-5000.txt
+	test:  bg-mk.5000-6500.txt
+
+bg->en->mk
+
+	path: bg-en.5000-6500.txt + en-mk.5000-6500.txt
+
+	bg-en.5000-6500.txt
+		елен	deer
+		елен	ellen
+		елен	helene
+
+	en-mk.5000-6500.txt
+		deer	срна
+		deer	елен
+		deer	елени
+		ellen	елен
+
+after merge:
+	bg-mk.5000-6500.txt
+		елен	срна
+		елен	елен
+		елен	елени
+
+* Let us do this: bg-en.txt + en-mk.txt --> bg-mk.txt
+
+Then,
+	- take the first 5000 to form TRAIN: bg-mk.0-5000.txt
+	- take the next  1500 to form TEST : bg-mk.5000-6500.txt
+
+
+TODO:
+	- double-check the mapping for the FULL, e.g., "елен", but also check 3-5 other words.
+	- then, split the full into TRAIN/TEST/rest
+	- rerun experiments with dico_train, ... using TEST (also TRAIN in some experiments)
+
+
+2018-12-01
+==========
+(Maria, Preslav)
+
+TODO:
+1. Train/dev/test with the dictionaries.
+2. Create COMMON-BG-MK-WORDS.txt, e.g., "да", "телефон", "имало", "дали".
+	- BG-WORDS.txt: create a list of all Bulgarian words in data/wiki.bg.vec
+	- MK-WORDS.txt: create a list of all Macedonian words in data/wiki.mk.vec
+	- COMMON-BG-MK-WORDS.txt: intersection of BG-WORDS.txt and MK-WORDS.txt
+3. Train/dev/test with the dictionaries, where TRAIN=(COMMON-BG-MK-WORDS.txt,COMMON-BG-MK-WORDS.txt).
+4. Train/dev/test with the dictionaries, where TRAIN=train + (COMMON-BG-MK-WORDS.txt,COMMON-BG-MK-WORDS.txt).
+5. Later: "история"--"историjа"
+	- https://en.wikipedia.org/wiki/Help:IPA/Bulgarian_and_Macedonian
+	- ю, я, щ
+6. Smarter models for transliteration mapping.
+	- maybe also iterative bootstrapping:
+		- add some of the best choices as training data and retrain
+
+Maybe:
+	- try 50,000 instead of 20,000 for number of embedding vectors
+
+
+Notes:
+
+- monolingual evaluation for Bulgarian and Macedonian: not supported
+
+- cross-lingual evaluation: coming
+
+- training:
+
+Original:
+	python evaluate.py --src_lang en --tgt_lang es --src_emb data/wiki.en-es.en.vec --tgt_emb data/wiki.en-es.es.vec --max_vocab 200000
+
+Becomes this:
+
+	python evaluate.py --src_lang bg --tgt_lang mk --src_emb data/wiki.multi.bg.vec --tgt_emb data/wiki.multi.mk.vec --max_vocab 50000
+
+INFO - 12/01/18 12:32:27 - 0:00:00 - ============ Initialized logger ============
+INFO - 12/01/18 12:32:27 - 0:00:00 - cuda: True
+                                     dico_eval: default
+                                     emb_dim: 300
+                                     exp_id: 
+                                     exp_name: debug
+                                     exp_path: C:\Mimi\SU\diplomna\MUSE\dumped\debug\woe73dsly0
+                                     max_vocab: 50000
+                                     normalize_embeddings: 
+                                     src_emb: data/wiki.multi.bg.vec
+                                     src_lang: bg
+                                     tgt_emb: data/wiki.multi.mk.vec
+                                     tgt_lang: mk
+                                     verbose: 2
+INFO - 12/01/18 12:32:27 - 0:00:00 - The experiment will be stored in C:\Mimi\SU\diplomna\MUSE\dumped\debug\woe73dsly0
+INFO - 12/01/18 12:32:33 - 0:00:06 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/01/18 12:32:43 - 0:00:15 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/01/18 12:32:43 - 0:00:16 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/01/18 12:32:44 - 0:00:17 - 180 source words - nn - Precision at k = 1: 36.666667
+INFO - 12/01/18 12:32:44 - 0:00:17 - 180 source words - nn - Precision at k = 5: 57.777778
+INFO - 12/01/18 12:32:44 - 0:00:17 - 180 source words - nn - Precision at k = 10: 65.000000
+INFO - 12/01/18 12:32:44 - 0:00:17 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/01/18 12:32:53 - 0:00:26 - 180 source words - csls_knn_10 - Precision at k = 1: 41.111111
+INFO - 12/01/18 12:32:53 - 0:00:26 - 180 source words - csls_knn_10 - Precision at k = 5: 63.333333
+INFO - 12/01/18 12:32:53 - 0:00:26 - 180 source words - csls_knn_10 - Precision at k = 10: 72.777778
+ 
+********* dumped/bg-mk-small-dict *********
+
+$ python supervised.py --src_lang bg --tgt_lang mk --src_emb data/wiki.bg.vec --tgt_emb data/wiki.mk.vec --n_refinement 5 --dico_train identical_char --max_vocab 20000 --exp_name bg-mk
+
+INFO - 12/01/18 13:14:42 - 0:00:00 - ============ Initialized logger ============
+INFO - 12/01/18 13:14:42 - 0:00:00 - cuda: True
+                                     dico_eval: default
+                                     emb_dim: 300
+                                     exp_id: 
+                                     exp_name: debug
+                                     exp_path: C:\Mimi\SU\diplomna\MUSE\dumped\debug\tqk34l5r9r
+                                     max_vocab: 50000
+                                     normalize_embeddings: 
+                                     src_emb: dumped/bg-mk-small-dict/66o8fijjfc/vectors-bg.txt
+                                     src_lang: bg
+                                     tgt_emb: dumped/bg-mk-small-dict/66o8fijjfc/vectors-mk.txt
+                                     tgt_lang: mk
+                                     verbose: 2
+INFO - 12/01/18 13:14:42 - 0:00:00 - The experiment will be stored in C:\Mimi\SU\diplomna\MUSE\dumped\debug\tqk34l5r9r
+INFO - 12/01/18 13:14:49 - 0:00:07 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/01/18 13:15:00 - 0:00:18 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/01/18 13:15:02 - 0:00:20 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/01/18 13:15:02 - 0:00:20 - 180 source words - nn - Precision at k = 1: 45.000000
+INFO - 12/01/18 13:15:02 - 0:00:20 - 180 source words - nn - Precision at k = 5: 61.666667
+INFO - 12/01/18 13:15:02 - 0:00:20 - 180 source words - nn - Precision at k = 10: 66.666667
+INFO - 12/01/18 13:15:02 - 0:00:20 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/01/18 13:15:11 - 0:00:29 - 180 source words - csls_knn_10 - Precision at k = 1: 47.222222
+INFO - 12/01/18 13:15:11 - 0:00:29 - 180 source words - csls_knn_10 - Precision at k = 5: 67.222222
+INFO - 12/01/18 13:15:11 - 0:00:29 - 180 source words - csls_knn_10 - Precision at k = 10: 72.777778
+
+
+
+
+2018-11-21
+==========
+(Maria, Preslav)
+
+- Let us focus on the numbers!
+
+TODO:
+	- evaluate the embeddings
+		- cross-lingual
+		- monolingual -- if supported for Macedonian and Bulgarian
+	- What to evaluate:
+		(a) original
+???		(b) unsupervised (the paper discusses this!)
+*-->*	(c) adapted with exact word overlap considered as cognates (NO dictionaries)
+			--dico_train identical_char
+???		(d) adapted with a dictionary
+			--dico_train default
+
+Try and compare (should be almost identical):
+	"--dico_train identical_char" 
+	vs. 
+	"--dico_train identical_char" with 1-line dictionaries ("да", "да")
+
+* https://github.com/google-research/bert/blob/master/multilingual.md
+
+
+2018-05-30
+==========
+(Maria, Preslav)
+
+1. Get the vectors from here:
+	- all: https://github.com/facebookresearch/fastText/blob/master/pretrained-vectors.md
+	- use "text"
+	- Bulgarian: https://s3-us-west-1.amazonaws.com/fasttext-vectors/wiki.bg.vec
+	- Macedonian: https://s3-us-west-1.amazonaws.com/fasttext-vectors/wiki.mk.vec
+
+2. Need to create "test" (and maybe also "train") dictionaries for Bulgarian-Macedonian
+	- Ground-truth bilingual dictionaries
+	- start from "test" for en-bg, en-mk, bg-en, mk-en
+		- bg-en-mk? bg-en + en-bg --> bg-mk
+		- mk-en-bg?
+			- "котка"-"cat" (bg-en) + "cat"-"мачка" (en-mk) --> "котка"-"мачка" (bg-mk)
+		- (bg-en + en-bg) + (en-mk + mk-en) --> mk<->bg (without direction) --> bg->mk, mk->bg
+	- If we want supervised, we can do the same for "train"
+
+3. We can then train both unsupervised and supervised
+
+4. Try visualization:
+	- https://github.com/facebookresearch/MUSE/blob/master/demo.ipynb
+
+- Direction: Macedonian --> Bulgarian?

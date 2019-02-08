@@ -1,0 +1,25 @@
+INFO - 12/19/18 10:47:51 - 0:00:00 - ============ Initialized logger ============
+INFO - 12/19/18 10:47:51 - 0:00:00 - cuda: True
+                                     dico_eval: default
+                                     emb_dim: 300
+                                     exp_id: 
+                                     exp_name: bg-mk-big-dict-eval
+                                     exp_path: test-different-dicts\bg-mk-big-dict-eval\m102gmsil3
+                                     max_vocab: 50000
+                                     normalize_embeddings: 
+                                     src_emb: test-different-dicts/bg-mk-big-dict-supervised/mw5dqbvruo/vectors-bg.txt
+                                     src_lang: bg
+                                     tgt_emb: test-different-dicts/bg-mk-big-dict-supervised/mw5dqbvruo/vectors-mk.txt
+                                     tgt_lang: mk
+                                     verbose: 2
+INFO - 12/19/18 10:47:51 - 0:00:00 - The experiment will be stored in test-different-dicts\bg-mk-big-dict-eval\m102gmsil3
+INFO - 12/19/18 10:47:57 - 0:00:06 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/19/18 10:48:06 - 0:00:15 - Loaded 50000 pre-trained word embeddings.
+INFO - 12/19/18 10:48:07 - 0:00:16 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/19/18 10:48:07 - 0:00:16 - 180 source words - nn - Precision at k = 1: 42.777778
+INFO - 12/19/18 10:48:07 - 0:00:16 - 180 source words - nn - Precision at k = 5: 62.777778
+INFO - 12/19/18 10:48:07 - 0:00:16 - 180 source words - nn - Precision at k = 10: 66.111111
+INFO - 12/19/18 10:48:07 - 0:00:16 - Found 186 pairs of words in the dictionary (180 unique). 17 other pairs contained at least one unknown word (0 in lang1, 17 in lang2)
+INFO - 12/19/18 10:48:18 - 0:00:27 - 180 source words - csls_knn_10 - Precision at k = 1: 45.555556
+INFO - 12/19/18 10:48:18 - 0:00:27 - 180 source words - csls_knn_10 - Precision at k = 5: 66.666667
+INFO - 12/19/18 10:48:18 - 0:00:27 - 180 source words - csls_knn_10 - Precision at k = 10: 71.666667
