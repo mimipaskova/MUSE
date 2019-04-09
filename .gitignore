@@ -134,3 +134,8 @@ data/wiki.multi.mk.vec
 data/wiki.multi.bg.vec
 test-different-dicts/*/*/vectors-bg.txt
 test-different-dicts/*/*/vectors-mk.txt
+
+*.txt
+*.pkl
+*.log
+*.pth
