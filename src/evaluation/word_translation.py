@@ -60,6 +60,9 @@ def load_dictionary(path, word2id1, word2id2):
             if len(parts) < 2:
                 logger.warning("Could not parse line %s (%i)", line, index)
                 continue
+            if len(parts) > 2:
+                logger.warning("More than 3 words %s (%i)", line, index)
+                continue
             word1, word2 = parts
             if word1 in word2id1 and word2 in word2id2:
                 pairs.append((word1, word2))
